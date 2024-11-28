@@ -4,14 +4,10 @@ import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
 import threading
 
-# Fixed directory for logs
+# directory for logs
 LOG_DIRECTORY = r"\\directory\log"
 
 def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_label, search_button):
-    """
-    Search for multiple keywords in the selected log file within the fixed directory.
-    Displays results immediately and highlights them after the search is complete.
-    """
     if not os.path.exists(LOG_DIRECTORY):
         messagebox.showerror("Error", f"Directory '{LOG_DIRECTORY}' does not exist.")
         search_button.config(state=tk.NORMAL)
@@ -80,11 +76,7 @@ def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_
 
     search_button.config(state=tk.NORMAL)
 
-
 def highlight_all_results(result_box, keywords):
-    """
-    Highlight all occurrences of keywords in the result box after search completes.
-    """
     for keyword in keywords:
         start_pos = "1.0"  # Start at the beginning of the text
         while True:
@@ -97,7 +89,6 @@ def highlight_all_results(result_box, keywords):
             start_pos = end_pos  # Move past the last match
 
 def start_search(entry, selected_file, result_box, progress_bar, progress_bar_label, search_button):
-    """Trigger the search with user input, handle button disable/enable and progress updates."""
     input_text = entry.get().strip()
     if not input_text:
         messagebox.showwarning("Warning", "Please enter keywords to search.")
@@ -115,7 +106,6 @@ def start_search(entry, selected_file, result_box, progress_bar, progress_bar_la
     threading.Thread(target=search_logs, args=(selected_file, keywords, result_box, progress_bar, progress_bar_label, search_button)).start()
 
 def create_gui():
-    """Create the GUI application."""
     global root  # To access the root window in other functions
 
     root = tk.Tk()
