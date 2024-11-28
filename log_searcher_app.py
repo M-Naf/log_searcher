@@ -140,7 +140,7 @@ def create_gui():
     keyword_entry.bind("<Return>", lambda event: start_search(keyword_entry, log_file_combobox.get(), result_box, progress_bar, progress_bar_label, search_button))
 
     # Scrolled text box for results
-    result_box = scrolledtext.ScrolledText(root, width=230, height=50, wrap=tk.WORD)  # Enable word wrap
+    result_box = scrolledtext.ScrolledText(root, width=250, height=50, wrap=tk.WORD)  # Enable word wrap
     result_box.grid(row=1, column=0, padx=10, pady=10)
     result_box.config(font=("Calibri", 9))
     result_box.tag_config("success", foreground="green", font=("Calibri", 9, "bold"))
