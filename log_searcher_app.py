@@ -7,41 +7,11 @@ import threading
 # Fixed directory for logs
 LOG_DIRECTORY = r"\\sh2\mail$\log"
 
-def highlight_keywords(result_box, line, keywords, log_file, line_number):
-    """
-    :param result_box: The scrolled text widget for displaying results.
-    :param line: The line of text to search through.
-    :param keywords: List of keywords to search for.
-    :param log_file: The log file name (for display in results).
-    :param line_number: The line number in the log file.
-    """
-    result_box.insert(tk.END, f"\n[{log_file} - Line {line_number}] ")
-    
-    start_index = result_box.index(tk.END)  # Store where the text insertion ends before adding any tags
-    result_box.insert(tk.END, line.strip())  # Insert the line into the result box
-    
-    # Now, go through the line and highlight keywords
-    for keyword in keywords:
-        start_pos = '1.0'  # Start from the beginning of the line
-        while True:
-            start_pos = result_box.search(keyword, start_pos, stopindex=tk.END, nocase=True)
-            if not start_pos:
-                break
-            end_pos = f"{start_pos}+{len(keyword)}c"
-            # Apply a tag to highlight the keyword
-            result_box.tag_add("highlight", start_pos, end_pos)
-            result_box.tag_config("highlight", foreground="red", font=("Arial", 10, "bold"))  # Highlight style
-            start_pos = end_pos  # Move past the last match
-
 def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_label, search_button):
     """
     Search for multiple keywords in the selected log file within the fixed directory.
-    
-    1. Improved error handling when reading files.
-    2. Optimized file reading with buffering and progress bar updates.
-    3. Handled large file efficiently using buffered reading.
+    Displays results immediately and highlights them after the search is complete.
     """
-    # Ensure directory exists only once
     if not os.path.exists(LOG_DIRECTORY):
         messagebox.showerror("Error", f"Directory '{LOG_DIRECTORY}' does not exist.")
         search_button.config(state=tk.NORMAL)
@@ -59,9 +29,9 @@ def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_
             f for f in os.listdir(LOG_DIRECTORY)
             if f.startswith(selected_file) and not f.endswith(".gz") and os.path.isfile(os.path.join(LOG_DIRECTORY, f))
         ]
-    
+
     if not log_files:
-        result_box.insert(tk.END, f"No log files found for '{selected_file}'.\n")
+        result_box.insert(tk.END, f"No log files found for '{selected_file}'.\n", "error")
         search_button.config(state=tk.NORMAL)
         return
 
@@ -74,12 +44,12 @@ def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_
     for log_file in log_files:
         log_path = os.path.join(LOG_DIRECTORY, log_file)
         try:
-            with open(log_path, 'r', buffering=8192) as file:  # Open file with buffered read
-                total_lines += sum(1 for line in file)  # Count number of lines
+            with open(log_path, 'r', buffering=8192) as file:
+                total_lines += sum(1 for line in file)
         except Exception as e:
-            result_box.insert(tk.END, f"Error reading file '{log_file}': {e}\n")
+            result_box.insert(tk.END, f"Error reading file '{log_file}': {e}\n", "error")
 
-    # Search for keywords with optimized handling of large files
+    # Search and display results
     for log_file in log_files:
         log_path = os.path.join(LOG_DIRECTORY, log_file)
         try:
@@ -87,25 +57,44 @@ def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_
                 for line_number, line in enumerate(file, 1):
                     current_line += 1
                     progress_bar["value"] = (current_line / total_lines) * 100
-                    root.update_idletasks()  # Update progress bar
+                    root.update_idletasks()
 
                     # Check if the line contains all keywords
                     if all(re.search(keyword, line, re.IGNORECASE) for keyword in keywords):
-                        highlight_keywords(result_box, line, keywords, log_file, line_number)
+                        result_box.insert(tk.END, f"[{log_file} - Line {line_number}] {line.strip()}\n")
                         found = True
         except Exception as e:
-            result_box.insert(tk.END, f"Error reading file '{log_file}': {e}\n")
+            result_box.insert(tk.END, f"Error reading file '{log_file}': {e}\n", "error")
 
     # Final update of progress bar
     progress_bar["value"] = 100
     progress_bar_label.config(text="Complete")
 
     if not found:
-        result_box.insert(tk.END, f"No matches found for keywords: {', '.join(keywords)}.\n")
+        result_box.insert(tk.END, f"No matches found for keywords: {', '.join(keywords)}.\n", "error")
     else:
-        result_box.insert(tk.END, "\n\nSearch completed.\n")
+        result_box.insert(tk.END, "\nSearch completed.\n", "success")
+
+    # Highlight keywords after search
+    highlight_all_results(result_box, keywords)
 
     search_button.config(state=tk.NORMAL)
+
+
+def highlight_all_results(result_box, keywords):
+    """
+    Highlight all occurrences of keywords in the result box after search completes.
+    """
+    for keyword in keywords:
+        start_pos = "1.0"  # Start at the beginning of the text
+        while True:
+            start_pos = result_box.search(keyword, start_pos, stopindex=tk.END, nocase=True)
+            if not start_pos:
+                break
+            end_pos = f"{start_pos}+{len(keyword)}c"
+            result_box.tag_add("highlight", start_pos, end_pos)
+            result_box.tag_config("highlight", foreground="green", font=("Calibri", 9, "bold"))
+            start_pos = end_pos  # Move past the last match
 
 def start_search(entry, selected_file, result_box, progress_bar, progress_bar_label, search_button):
     """Trigger the search with user input, handle button disable/enable and progress updates."""
@@ -163,7 +152,9 @@ def create_gui():
     # Scrolled text box for results
     result_box = scrolledtext.ScrolledText(root, width=230, height=50, wrap=tk.WORD)  # Enable word wrap
     result_box.grid(row=1, column=0, padx=10, pady=10)
-
+    result_box.config(font=("Calibri", 9))
+    result_box.tag_config("success", foreground="green", font=("Calibri", 9, "bold"))
+    result_box.tag_config("error", foreground="red", font=("Calibri", 9, "bold"))
     # Run the application
     root.mainloop()
 
