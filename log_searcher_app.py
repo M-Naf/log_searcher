@@ -4,27 +4,38 @@ import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
 import threading
 
-# directory for logs
+# Fixed directory for logs
 LOG_DIRECTORY = r"\\directory\log"
 
 def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_label, search_button):
+    """
+    Search for multiple keywords in the selected log file within the fixed directory, recursively.
+    Displays results immediately and highlights them after the search is complete.
+    """
     if not os.path.exists(LOG_DIRECTORY):
         messagebox.showerror("Error", f"Directory '{LOG_DIRECTORY}' does not exist.")
         search_button.config(state=tk.NORMAL)
         return
 
     log_files = []
-    if selected_file == "All":
-        log_files = [
-            f for f in os.listdir(LOG_DIRECTORY)
-            if (f.startswith("audit.log") or f.startswith("mailbox.log") or f.startswith("zimbra.log"))
-            and not f.endswith(".gz") and os.path.isfile(os.path.join(LOG_DIRECTORY, f))
-        ]
-    else:
-        log_files = [
-            f for f in os.listdir(LOG_DIRECTORY)
-            if f.startswith(selected_file) and not f.endswith(".gz") and os.path.isfile(os.path.join(LOG_DIRECTORY, f))
-        ]
+    prefix_map = {
+        "All": ["audit.log", "mailbox.log", "zimbra.log", "ip_block"],
+        "audit.log": ["audit.log"],
+        "ip_block": ["ip_block"],
+        "mailbox.log": ["mailbox.log"],
+        "zimbra.log": ["zimbra.log"]
+    }
+
+    if selected_file not in prefix_map:
+        messagebox.showerror("Error", f"Invalid selection '{selected_file}'.")
+        search_button.config(state=tk.NORMAL)
+        return
+
+    # Traverse the directory recursively
+    for root_dir, _, files in os.walk(LOG_DIRECTORY):
+        for file in files:
+            if any(file.startswith(prefix) and not file.endswith(".gz") for prefix in prefix_map[selected_file]):
+                log_files.append(os.path.join(root_dir, file))
 
     if not log_files:
         result_box.insert(tk.END, f"No log files found for '{selected_file}'.\n", "error")
@@ -38,18 +49,16 @@ def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_
 
     # Count total lines for progress bar
     for log_file in log_files:
-        log_path = os.path.join(LOG_DIRECTORY, log_file)
         try:
-            with open(log_path, 'r', buffering=8192) as file:
+            with open(log_file, 'r', buffering=8192) as file:
                 total_lines += sum(1 for line in file)
         except Exception as e:
             result_box.insert(tk.END, f"Error reading file '{log_file}': {e}\n", "error")
 
     # Search and display results
     for log_file in log_files:
-        log_path = os.path.join(LOG_DIRECTORY, log_file)
         try:
-            with open(log_path, 'r', buffering=8192) as file:
+            with open(log_file, 'r', buffering=8192) as file:
                 for line_number, line in enumerate(file, 1):
                     current_line += 1
                     progress_bar["value"] = (current_line / total_lines) * 100
@@ -76,7 +85,11 @@ def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_
 
     search_button.config(state=tk.NORMAL)
 
+
 def highlight_all_results(result_box, keywords):
+    """
+    Highlight all occurrences of keywords in the result box after search completes.
+    """
     for keyword in keywords:
         start_pos = "1.0"  # Start at the beginning of the text
         while True:
@@ -88,7 +101,9 @@ def highlight_all_results(result_box, keywords):
             result_box.tag_config("highlight", foreground="green", font=("Calibri", 9, "bold"))
             start_pos = end_pos  # Move past the last match
 
+
 def start_search(entry, selected_file, result_box, progress_bar, progress_bar_label, search_button):
+    """Trigger the search with user input, handle button disable/enable and progress updates."""
     input_text = entry.get().strip()
     if not input_text:
         messagebox.showwarning("Warning", "Please enter keywords to search.")
@@ -105,7 +120,9 @@ def start_search(entry, selected_file, result_box, progress_bar, progress_bar_la
     # Run the search in a separate thread to avoid freezing the GUI
     threading.Thread(target=search_logs, args=(selected_file, keywords, result_box, progress_bar, progress_bar_label, search_button)).start()
 
+
 def create_gui():
+    """Create the GUI application."""
     global root  # To access the root window in other functions
 
     root = tk.Tk()
@@ -122,7 +139,7 @@ def create_gui():
     # Create Combobox for selecting log file
     log_file_label = ttk.Label(frame, text="Select log file:")
     log_file_label.grid(row=1, column=0, sticky=tk.W)
-    log_file_combobox = ttk.Combobox(frame, values=["All", "audit.log", "mailbox.log", "zimbra.log"], state="readonly")
+    log_file_combobox = ttk.Combobox(frame, values=["All", "audit.log", "ip_block", "mailbox.log", "zimbra.log"], state="readonly")
     log_file_combobox.set("All")  # Default selection
     log_file_combobox.grid(row=1, column=1, padx=5, sticky=tk.W)
 
@@ -145,8 +162,10 @@ def create_gui():
     result_box.config(font=("Calibri", 9))
     result_box.tag_config("success", foreground="green", font=("Calibri", 9, "bold"))
     result_box.tag_config("error", foreground="red", font=("Calibri", 9, "bold"))
+
     # Run the application
     root.mainloop()
+
 
 if __name__ == "__main__":
     create_gui()
