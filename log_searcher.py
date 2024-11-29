@@ -10,30 +10,27 @@ def search_logs(file_filter, keywords, directory):
         print(f"\033[91mError: Directory '{directory}' does not exist.\033[0m")
         return
 
-    # Select files based on the file filter
-    if file_filter == "-all":
-        log_files = [
-            f for f in os.listdir(directory)
-            if (f.startswith("audit.log") or f.startswith("mailbox.log") or f.startswith("zimbra.log"))
-            and not f.endswith(".gz")
-            and os.path.isfile(os.path.join(directory, f))
-        ]
-    else:
-        prefix_map = {
-            "-audit": "audit.log",
-            "-mailbox": "mailbox.log",
-            "-zimbra": "zimbra.log"
-        }
-        if file_filter not in prefix_map:
-            print(f"\033[91mError: Invalid file filter '{file_filter}'. Use -all, -audit, -mailbox, or -zimbra.\033[0m")
-            return
-        log_files = [
-            f for f in os.listdir(directory)
-            if f.startswith(prefix_map[file_filter]) and not f.endswith(".gz") and os.path.isfile(os.path.join(directory, f))
-        ]
+    log_files = []
+    prefix_map = {
+        "-all": ["audit.log", "mailbox.log", "zimbra.log", "ip_block"],
+        "-audit": ["audit.log"],
+        "-ip": ["ip_block"],
+        "-mailbox": ["mailbox.log"],
+        "-zimbra": ["zimbra.log"]
+    }
+
+    if file_filter not in prefix_map:
+        print(f"\033[91mError: Invalid file filter '{file_filter}'. Use -all, -audit, -ip, -mailbox, or -zimbra.\033[0m")
+        return
+
+    # Traverse the directory and its subdirectories
+    for root, _, files in os.walk(directory):
+        for file in files:
+            if any(file.startswith(prefix) and not file.endswith(".gz") for prefix in prefix_map[file_filter]):
+                log_files.append(os.path.join(root, file))
 
     if not log_files:
-        print(f"No log files found matching the filter '{file_filter}' in the directory.")
+        print(f"No log files found matching the filter '{file_filter}' in the directory or its subdirectories.")
         return
 
     print(f"Searching for keywords: {', '.join(keywords)} in log files filtered by '{file_filter}'...\n")
@@ -44,7 +41,7 @@ def search_logs(file_filter, keywords, directory):
         for keyword in keywords:
             text = re.sub(
                 f"({re.escape(keyword)})",  # Escape special characters in the keyword
-                r"\033[92m\1\033[0m",  # Highlight with red text
+                r"\033[92m\1\033[0m",  # Highlight with green text
                 text,
                 flags=re.IGNORECASE,
             )
@@ -52,9 +49,8 @@ def search_logs(file_filter, keywords, directory):
 
     # Search for the keywords in each selected log file
     for log_file in log_files:
-        log_path = os.path.join(directory, log_file)
         try:
-            with open(log_path, 'r') as file:
+            with open(log_file, 'r') as file:
                 for line_number, line in enumerate(file, 1):
                     # Check if all keywords are present in the line (case-insensitive)
                     if all(re.search(keyword, line, re.IGNORECASE) for keyword in keywords):
@@ -73,13 +69,13 @@ if __name__ == "__main__":
     # Ensure correct usage
     if len(sys.argv) < 3:
         print("\033[94m\nUsage: \033[93mpython \033[0mlog_searcher.py \033[96m<file_filter> \033[0m<keyword1> [<keyword2> ...]")
-        print("\033[94mExample: \033[93mpython \033[0mlog_searcher.py \033[96m-all \033[0mtest@test.com 13:00 to=test2@test.com")
-        print("or")
+        print("\033[92mUse: -all, -audit, -ip, -mailbox, or -zimbra.\n")
+        print("\033[94mExample: \033[93mpython \033[0mlog_searcher.py \033[96m-all \033[0mtest@test.com 13:00 to=test2@test.com\nor")
         print("\033[94mUsage: \033[93mpython \033[0m.\log_searcher.py \033[96m<file_filter> \033[0m<keyword1> [<keyword2> ...]")
         print("\033[94mExample: \033[93mpython \033[0m.\log_searcher.py \033[96m-all \033[0mtest@test.com 13:00 to=test2@test.com")
         sys.exit(1)
 
-    # Get the file filter (e.g., -all, -audit, -mailbox, -zimbra)
+    # Get the file filter 
     file_filter = sys.argv[1]
 
     # Get the keywords for the search
