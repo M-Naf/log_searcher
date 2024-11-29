@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
 import threading
 
-LOG_DIRECTORY = r"\\sh2\mail$"  # Fixed directory for logs
+LOG_DIRECTORY = r"\\directory\log"  # Fixed directory for logs
 
 def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_label, search_button):
     """
