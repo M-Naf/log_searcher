@@ -2,15 +2,17 @@ import os
 import re
 import sys
 
-LOG_DIRECTORY = r"\\directory\log"
+LOG_DIRECTORY = r"\\sh2\mail$"
 
 def search_logs(file_filter, keywords, directory):
-
+    """Search for keywords in log files filtered by the specified file filter."""
+    
+    # Check if the directory exists
     if not os.path.exists(directory):
         print(f"\033[91mError: Directory '{directory}' does not exist.\033[0m")
         return
-
-    log_files = []
+    
+    log_files = []  # List to hold the paths of log files
     prefix_map = {
         "-all": ["audit.log", "mailbox.log", "zimbra.log", "ip_block"],
         "-audit": ["audit.log"],
@@ -18,17 +20,19 @@ def search_logs(file_filter, keywords, directory):
         "-mailbox": ["mailbox.log"],
         "-zimbra": ["zimbra.log"]
     }
-
+    
+    # Validate the file filter
     if file_filter not in prefix_map:
         print(f"\033[91mError: Invalid file filter '{file_filter}'. Use -all, -audit, -ip, -mailbox, or -zimbra.\033[0m")
         return
-
+    
     # Traverse the directory and its subdirectories
     for root, _, files in os.walk(directory):
         for file in files:
             if any(file.startswith(prefix) and not file.endswith(".gz") for prefix in prefix_map[file_filter]):
-                log_files.append(os.path.join(root, file))
+                log_files.append(os.path.join(root, file))  # Add matched log file to the list
 
+    # Check if any log files were found
     if not log_files:
         print(f"No log files found matching the filter '{file_filter}' in the directory or its subdirectories.")
         return
@@ -36,8 +40,9 @@ def search_logs(file_filter, keywords, directory):
     print(f"Searching for keywords: {', '.join(keywords)} in log files filtered by '{file_filter}'...\n")
     found = False
 
-    # Define ANSI color for highlighting
+    # Define a function for highlighting keywords in the text
     def highlight_text(text, keywords):
+        """Highlight keywords in the given text."""
         for keyword in keywords:
             text = re.sub(
                 f"({re.escape(keyword)})",  # Escape special characters in the keyword
@@ -60,6 +65,7 @@ def search_logs(file_filter, keywords, directory):
         except Exception as e:
             print(f"\033[91mError reading file '{log_file}': {e}\033[0m")
 
+    # Print results based on whether any matches were found
     if not found:
         print(f"No matches found for keywords: {', '.join(keywords)}.")
     else:
@@ -70,16 +76,12 @@ if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("\033[94m\nUsage: \033[93mpython \033[0mlog_searcher.py \033[96m<file_filter> \033[0m<keyword1> [<keyword2> ...]")
         print("\033[92mUse: -all, -audit, -ip, -mailbox, or -zimbra.\n")
-        print("\033[94mExample: \033[93mpython \033[0mlog_searcher.py \033[96m-all \033[0mtest@test.com 13:00 to=test2@test.com\nor")
-        print("\033[94mUsage: \033[93mpython \033[0m.\log_searcher.py \033[96m<file_filter> \033[0m<keyword1> [<keyword2> ...]")
-        print("\033[94mExample: \033[93mpython \033[0m.\log_searcher.py \033[96m-all \033[0mtest@test.com 13:00 to=test2@test.com")
+        print("\033[94mExample: \033[93mpython \033[0mlog_searcher.py \033[96m-all \033[0mtest@test.com 13:00 to=test2@test.com")
         sys.exit(1)
 
     # Get the file filter 
     file_filter = sys.argv[1]
-
     # Get the keywords for the search
     search_terms = sys.argv[2:]  # Remaining arguments after the file filter
-
     # Call the search function
     search_logs(file_filter, search_terms, LOG_DIRECTORY)
