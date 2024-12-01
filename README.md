@@ -31,6 +31,7 @@ python log_searcher.py -audit error
 ### File Filters
 - `-all`: Search in all relevant log files (audit.log, mailbox.log, zimbra.log).
 - `-audit`: Search in audit.log.
+- `-ip`: Search in ip_block.log.
 - `-mailbox`: Search in mailbox.log.
 - `-zimbra`: Search in zimbra.log.
 ### Output
