@@ -56,8 +56,8 @@ def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_
             with open(log_file, 'r', buffering=8192) as file:
                 # Read each line in the current log file
                 for line_number, line in enumerate(file, 1):
-                    # Check if any of the keywords are present in the line
-                    if any(keyword in line for keyword in keyword_set):
+                    # Check if all of the keywords are present in the line
+                    if all(keyword in line for keyword in keyword_set):
                         # If a match is found, insert it into the result box
                         result_box.insert(tk.END, f"[{log_file} - Line {line_number}] {line.strip()}\n")
                         found = True
