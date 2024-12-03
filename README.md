@@ -29,8 +29,10 @@ python log_searcher.py -all test@test.com 13:00
 python log_searcher.py -audit error
 ```
 ### File Filters
-- `-all`: Search in all relevant log files (audit.log, mailbox.log, zimbra.log).
+- `-all`: Search in all relevant log files.
+- `-address`: Search in address files.
 - `-audit`: Search in audit.log.
+- `-bruteforce`: Search in Bruteforce files.
 - `-ip`: Search in ip_block.log.
 - `-mailbox`: Search in mailbox.log.
 - `-zimbra`: Search in zimbra.log.
