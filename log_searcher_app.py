@@ -1,9 +1,10 @@
 import os
+import re
 import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox
 import threading
 
-LOG_DIRECTORY = r"\\directory\log"  # Fixed directory for logs
+LOG_DIRECTORY = r"\\sh2\mail$"  # Fixed directory for logs
 
 def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_label, search_button):
     """
@@ -18,11 +19,13 @@ def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_
 
     log_files = []  # List to hold paths of log files matching the selected prefix
     prefix_map = {
-        "All": ["audit.log", "mailbox.log", "zimbra.log", "ip_block"],
-        "audit.log": ["audit.log"],
-        "ip_block": ["ip_block"],
-        "mailbox.log": ["mailbox.log"],
-        "zimbra.log": ["zimbra.log"]
+        "All": ["address", "audit.log", "Bruteforce", "ip_block", "mailbox.log", "zimbra.log"],
+        "Address":["address"],
+        "Audit.log": ["audit.log"],
+        "Bruteforce":["Bruteforce"],
+        "IP_block": ["ip_block"],
+        "Mailbox.log": ["mailbox.log"],
+        "Zimbra.log": ["zimbra.log"]
     }
     
     # Validate the selected file
@@ -48,8 +51,7 @@ def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_
     result_box.insert(tk.END, f"Searching for keywords: {', '.join(keywords)} in {selected_file}...\n\n")
     found = False  # Flag to track if any matches are found
     total_files = len(log_files)  # Total number of files to process
-    keyword_set = set(keywords)  # Convert keywords to a set for faster lookup
-
+    keyword_patterns = [re.compile(re.escape(keyword), re.IGNORECASE) for keyword in keywords]
     # Search for keywords in each log file
     for index, log_file in enumerate(log_files):
         try:
@@ -57,7 +59,7 @@ def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_
                 # Read each line in the current log file
                 for line_number, line in enumerate(file, 1):
                     # Check if all of the keywords are present in the line
-                    if all(keyword in line for keyword in keyword_set):
+                    if all(pattern.search(line) for pattern in keyword_patterns): #case-insensitively
                         # If a match is found, insert it into the result box
                         result_box.insert(tk.END, f"[{log_file} - Line {line_number}] {line.strip()}\n")
                         found = True
@@ -127,7 +129,7 @@ def create_gui():
     keyword_entry.grid(row=0, column=1, padx=5)
     log_file_label = ttk.Label(frame, text="Select log file:")
     log_file_label.grid(row=1, column=0, sticky=tk.W)
-    log_file_combobox = ttk.Combobox(frame, values=["All", "audit.log", "ip_block", "mailbox.log", "zimbra.log"], state="readonly")
+    log_file_combobox = ttk.Combobox(frame, values=["All", "Address", "Audit.log", "Bruteforce", "IP_block", "Mailbox.log", "Zimbra.log"], state="readonly")
     log_file_combobox.set("All")  # Default selection
     log_file_combobox.grid(row=1, column=1, padx=5, sticky=tk.W)
     progress_bar_label = ttk.Label(frame, text="In Progress ...")
