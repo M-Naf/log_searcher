@@ -2,7 +2,7 @@ import os
 import re
 import sys
 
-LOG_DIRECTORY = r"\\sh2\mail$"
+LOG_DIRECTORY = r"\\d\logs"
 
 def search_logs(file_filter, keywords, directory):
     """Search for keywords in log files filtered by the specified file filter."""
