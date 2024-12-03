@@ -2,7 +2,7 @@ import os
 import re
 import sys
 
-LOG_DIRECTORY = r"\\directory\log"
+LOG_DIRECTORY = r"\\sh2\mail$"
 
 def search_logs(file_filter, keywords, directory):
     """Search for keywords in log files filtered by the specified file filter."""
@@ -14,8 +14,10 @@ def search_logs(file_filter, keywords, directory):
     
     log_files = []  # List to hold the paths of log files
     prefix_map = {
-        "-all": ["audit.log", "mailbox.log", "zimbra.log", "ip_block"],
+        "-all": ["address", "audit.log", "Bruteforce", "ip_block", "mailbox.log", "zimbra.log"],
+        "-address": ["address"],
         "-audit": ["audit.log"],
+        "-bruteforce": ["Bruteforce"],
         "-ip": ["ip_block"],
         "-mailbox": ["mailbox.log"],
         "-zimbra": ["zimbra.log"]
@@ -23,7 +25,7 @@ def search_logs(file_filter, keywords, directory):
     
     # Validate the file filter
     if file_filter not in prefix_map:
-        print(f"\033[91mError: Invalid file filter '{file_filter}'. Use -all, -audit, -ip, -mailbox, or -zimbra.\033[0m")
+        print(f"\033[91mError: Invalid file filter '{file_filter}'. Use -all, -address, -audit, -bruteforce, -ip, -mailbox, or -zimbra.\033[0m")
         return
     
     # Traverse the directory and its subdirectories
