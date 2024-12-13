@@ -77,7 +77,7 @@ if __name__ == "__main__":
     # Ensure correct usage
     if len(sys.argv) < 3:
         print("\033[94m\nUsage: \033[93mpython \033[0mlog_searcher.py \033[96m<file_filter> \033[0m<keyword1> [<keyword2> ...]")
-        print("\033[92mUse: -all, -audit, -ip, -mailbox, or -zimbra.\n")
+        print("\033[92mUse: -all, -address, -audit, -bruteforce, -ip, -mailbox, or -zimbra.\n")
         print("\033[94mExample: \033[93mpython \033[0mlog_searcher.py \033[96m-all \033[0mtest@test.com 13:00 to=test2@test.com")
         sys.exit(1)
 
