@@ -39,7 +39,7 @@ def search_logs(file_filter, keywords, directory):
         print(f"No log files found matching the filter '{file_filter}' in the directory or its subdirectories.")
         return
 
-    print(f"Searching for keywords: {', '.join(keywords)} in log files filtered by '{file_filter}'...\n")
+    print(f"Searching for keywords: {', '.join(keywords)} in '{file_filter}' log files...\n")
     found = False
 
     # Define a function for highlighting keywords in the text
