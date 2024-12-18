@@ -78,7 +78,21 @@ Both scripts use a fixed log directory:
 ```bash
 d:\test\log\
 ```
-Ensure this directory exists and contains the relevant log files. If the directory is missing or inaccessible, the scripts will provide appropriate error messages.
+##### Ensure this directory exists and contains the relevant log files. If the directory is missing or inaccessible, the scripts will provide appropriate error messages.
+
+---
+### Compile to .exe
+- Install PyInstaller
+```bash
+pip install pyinstaller
+```
+- Then run
+```bash
+pyinstaller --onefile --icon=D:\icon\logS.ico --noconsole log_searcher_app.py 
+```
+The `--onefile` option tells PyInstaller to bundle everything into a single executable file.
+
+`--noconsole` is to hide the console window
 ### **Highlights**
 - Command-Line Script: Suitable for automation or advanced users.
 - GUI Script: Intuitive and ideal for manual searches.
