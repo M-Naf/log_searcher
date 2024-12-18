@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk, scrolledtext, messagebox, filedialog
 import threading
 
-LOG_DIRECTORY = r"d:\dir\logs"  #directory for logs
+LOG_DIRECTORY = r"d:\dir\log"  #directory for logs
 cancel_event = threading.Event()  # Event to control cancellation of the search
 
 def search_logs(selected_file, keywords, result_box, progress_bar, progress_bar_label, search_button):
@@ -167,6 +167,11 @@ def create_gui():
     #footer label
     footer_label = ttk.Label(root, text="Copyright M.Naf 2024", foreground="green",font=("Calibri", 9, "bold"))
     footer_label.grid(row=2, column=0, pady=10,padx=30, sticky=tk.E)
+    #default icon
+    try:
+        root.iconbitmap(r"E:\icon\logS.ico")  
+    except Exception as e:
+        print(f"Error setting icon: {e}")
     root.mainloop()
 
 if __name__ == "__main__":
