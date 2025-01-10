@@ -75,7 +75,7 @@ def display_progress_bar(iteration, total, bar_length=50):
     progress = (iteration / total)
     arrow = '=' * int(round(progress * bar_length) - 1) + '>'
     spaces = ' ' * (bar_length - len(arrow))
-    sys.stderr.write(f'\rProgress: [{arrow + spaces}] {int(progress * 100)}%')
+    sys.stderr.write(f'\rProgress: [{arrow + spaces}] {int(progress * 100)}%\n')
     sys.stderr.flush()
 
 if __name__ == "__main__":
