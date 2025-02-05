@@ -22,11 +22,11 @@ python log_searcher.py <file_filter> <keyword1> and <keyword2> or [<keyword3> ..
 ### **Examples**
 #### 1. Search all logs for a specific email and time:
 ```bash
-python log_searcher.py -all test@test.com and 13:00 or test2
+python log_searcher.py -all "test@test.com" and "13:00" or "test2"
 ```
 #### 2. Search only audit.log files:
 ```bash
-python log_searcher.py -audit error
+python log_searcher.py -audit "error"
 ```
 ### File Filters
 - `-all`: Search in all relevant log files.
@@ -59,7 +59,7 @@ python log_searcher_app.py
 3. Select Log File: Choose from `All`, `audit.log`, `mailbox.log`, or `zimbra.log`.
 4. Click Search or Return: View results in the scrolling text box, with matches highlighted in green and errors in red.
 ### **Components**
-- Keyword Input: Type search terms, separated by spaces.
+- Keyword Input: Type search terms, enter the keyword between quote and use and (to search word with another) or (to search word or another word).
 - Log File Selection: Select from the dropdown menu.
 - Search Button: Initiates the search process.
 - Result Display: Scrollable text box showing matches and errors.
