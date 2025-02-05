@@ -17,12 +17,12 @@ This script (`log_searcher.py`) is designed for searching log files in a specifi
 
 ### **Usage**
 ```bash
-python log_searcher.py <file_filter> <keyword1> [<keyword2> ...]
+python log_searcher.py <file_filter> <keyword1> and <keyword2> or [<keyword3> ...]
 ```
 ### **Examples**
 #### 1. Search all logs for a specific email and time:
 ```bash
-python log_searcher.py -all test@test.com 13:00
+python log_searcher.py -all test@test.com and 13:00 or test2
 ```
 #### 2. Search only audit.log files:
 ```bash
