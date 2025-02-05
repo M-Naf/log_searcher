@@ -60,6 +60,10 @@ python log_searcher_app.py
 4. Click Search or Return: View results in the scrolling text box, with matches highlighted in green and errors in red.
 ### **Components**
 - Keyword Input: Type search terms, enter the keyword between quote and use and (to search word with another) or (to search word or another word).
+- Example:
+```bash
+"test@test.com" and "13:00" or "test2"
+```
 - Log File Selection: Select from the dropdown menu.
 - Search Button: Initiates the search process.
 - Result Display: Scrollable text box showing matches and errors.
